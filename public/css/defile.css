@@ -1,0 +1,486 @@
+:root {
+    --defile-maroon: #46131f;
+    --defile-dark: #250b13;
+    --defile-light: #682b37;
+    --defile-gold: #c9a76a;
+    --defile-cream: #f7f1e7;
+    --defile-ink: #2d2021;
+    --defile-muted: #76696a;
+}
+
+.defile-hero {
+    position: relative;
+    min-height: 650px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    color: white;
+    background:
+        radial-gradient(ellipse at 78% 45%, rgba(201, 167, 106, 0.17), transparent 35%),
+        linear-gradient(120deg, #250b13, #46131f 60%, #32101b);
+}
+
+.defile-hero::after {
+    position: absolute;
+    top: 15%;
+    right: -8%;
+    width: 470px;
+    height: 570px;
+    border: 1px solid rgba(201, 167, 106, 0.3);
+    border-radius: 50%;
+    content: "";
+    transform: rotate(32deg);
+    pointer-events: none;
+}
+
+.defile-hero-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.45;
+    background: repeating-linear-gradient(
+        130deg,
+        transparent,
+        transparent 100px,
+        rgba(201, 167, 106, 0.035) 101px,
+        transparent 102px
+    );
+    pointer-events: none;
+}
+
+.defile-hero-content {
+    position: relative;
+    z-index: 1;
+    padding-top: 150px;
+    padding-bottom: 100px;
+}
+
+.defile-breadcrumb {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+    letter-spacing: 1.7px;
+}
+
+.defile-breadcrumb a {
+    color: var(--defile-gold);
+}
+
+.defile-hero h1 {
+    max-width: 850px;
+    margin: 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 500;
+    line-height: 1.04;
+}
+
+.defile-hero h1 em {
+    color: var(--defile-gold);
+    font-weight: 400;
+}
+
+.defile-hero-description {
+    max-width: 570px;
+    margin-top: 25px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    line-height: 2.1;
+}
+
+.defile-scroll-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 30px;
+    padding-bottom: 10px;
+    color: var(--defile-gold);
+    border-bottom: 1px solid rgba(201, 167, 106, 0.5);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+.defile-scroll-link span {
+    font-size: 17px;
+}
+
+.defile-hero-index {
+    position: absolute;
+    right: 5%;
+    bottom: 30px;
+    left: 5%;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 8px;
+    letter-spacing: 1.8px;
+}
+
+.defile-introduction {
+    padding: 85px 0;
+    background: var(--defile-cream);
+}
+
+.defile-intro-title {
+    margin: 0;
+    color: var(--defile-ink);
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(39px, 5vw, 58px);
+    line-height: 1.08;
+}
+
+.defile-intro-title em {
+    color: #986f38;
+}
+
+.defile-intro-copy {
+    max-width: 750px;
+    margin-bottom: 16px;
+    color: var(--defile-ink);
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(22px, 3vw, 29px);
+    line-height: 1.65;
+}
+
+.defile-intro-note {
+    max-width: 700px;
+    margin: 0;
+    color: var(--defile-muted);
+    font-size: 12px;
+    line-height: 2;
+}
+
+.defile-list-section {
+    padding: 100px 0;
+    background: #fffaf2;
+}
+
+.defile-list-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 55px;
+}
+
+.defile-list-heading h2 {
+    margin: 0;
+    color: var(--defile-ink);
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 500;
+}
+
+.defile-list-heading h2 em {
+    color: #986f38;
+}
+
+.defile-list-heading > p {
+    max-width: 350px;
+    margin: 0;
+    color: var(--defile-muted);
+    font-size: 12px;
+    line-height: 2;
+}
+
+.defile-feature {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    min-height: 460px;
+    margin-bottom: 38px;
+    background: var(--defile-cream);
+    border: 1px solid rgba(70, 19, 31, 0.1);
+}
+
+.defile-feature:last-child {
+    margin-bottom: 0;
+}
+
+.defile-feature-reverse .defile-feature-art {
+    order: 2;
+}
+
+.defile-feature-reverse .defile-feature-content {
+    order: 1;
+}
+
+.defile-feature-art {
+    display: grid;
+    min-height: 420px;
+    place-items: center;
+    padding: 35px;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at center, rgba(201, 167, 106, 0.18), transparent 55%),
+        linear-gradient(145deg, #46131f, #250b13);
+}
+
+.defile-feature-two .defile-feature-art {
+    background:
+        radial-gradient(ellipse at center, rgba(201, 167, 106, 0.27), transparent 55%),
+        linear-gradient(145deg, #592431, #250b13);
+}
+
+.defile-feature-three .defile-feature-art {
+    background:
+        radial-gradient(ellipse at center, rgba(104, 43, 55, 0.8), transparent 55%),
+        linear-gradient(145deg, #32101b, #250b13);
+}
+
+.feature-art-frame {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 340px;
+    min-height: 350px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(201, 167, 106, 0.5);
+    outline: 1px solid rgba(201, 167, 106, 0.2);
+    outline-offset: 9px;
+    color: var(--defile-gold);
+    text-align: center;
+}
+
+.feature-art-frame::before,
+.feature-art-frame::after {
+    position: absolute;
+    width: 200px;
+    height: 265px;
+    border: 1px solid rgba(201, 167, 106, 0.25);
+    border-radius: 50%;
+    content: "";
+    transform: rotate(35deg);
+}
+
+.feature-art-frame::after {
+    transform: rotate(-35deg);
+}
+
+.feature-art-number {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.feature-art-symbol {
+    position: relative;
+    z-index: 1;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 120px;
+    line-height: 1;
+}
+
+.feature-art-caption {
+    position: absolute;
+    right: 8px;
+    bottom: 24px;
+    left: 8px;
+    font-size: 8px;
+    letter-spacing: 1.7px;
+}
+
+.defile-feature-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: clamp(30px, 5vw, 65px);
+}
+
+.feature-index {
+    margin-bottom: 14px;
+    color: #986f38;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.defile-feature-content h3 {
+    margin: 0;
+    color: var(--defile-maroon);
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(42px, 5vw, 60px);
+    font-weight: 500;
+    line-height: 1;
+}
+
+.feature-subtitle {
+    margin: 13px 0 0;
+    color: #986f38;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 20px;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.feature-gold-line {
+    width: 55px;
+    height: 1px;
+    margin: 23px 0;
+    background: var(--defile-gold);
+}
+
+.feature-focus {
+    margin-bottom: 14px;
+    color: var(--defile-ink);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.9;
+}
+
+.feature-description {
+    margin-bottom: 0;
+    color: var(--defile-muted);
+    font-size: 12px;
+    line-height: 2.1;
+}
+
+.defile-detail-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 27px;
+    padding-bottom: 9px;
+    color: var(--defile-maroon);
+    border-bottom: 1px solid var(--defile-gold);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+.defile-detail-link span {
+    color: #986f38;
+    font-size: 15px;
+}
+
+.defile-detail-link:hover {
+    color: #986f38;
+}
+
+.defile-closing {
+    padding: 90px 0;
+    color: white;
+    background:
+        radial-gradient(ellipse at center, rgba(104, 43, 55, 0.6), transparent 65%),
+        var(--defile-dark);
+}
+
+.defile-closing h2 {
+    margin: 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(39px, 6vw, 70px);
+    font-weight: 500;
+    line-height: 1.1;
+}
+
+.defile-closing h2 em {
+    color: var(--defile-gold);
+}
+
+.defile-closing .container > p:not(.eyebrow) {
+    max-width: 530px;
+    margin: 22px auto 28px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    line-height: 2;
+}
+
+@media (max-width: 991px) {
+    .defile-hero {
+        min-height: 600px;
+    }
+
+    .defile-feature {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .defile-feature-art {
+        min-height: 380px;
+        padding: 25px;
+    }
+
+    .feature-art-frame {
+        min-height: 300px;
+    }
+
+    .defile-feature-content {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 767px) {
+    .defile-hero-content {
+        padding-top: 135px;
+        padding-bottom: 110px;
+    }
+
+    .defile-hero h1 {
+        font-size: clamp(44px, 11vw, 65px);
+    }
+
+    .defile-hero-description {
+        font-size: 12px;
+    }
+
+    .defile-introduction {
+        padding: 65px 0;
+    }
+
+    .defile-list-section {
+        padding: 70px 0;
+    }
+
+    .defile-list-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 35px;
+    }
+
+    .defile-feature {
+        grid-template-columns: 1fr;
+        margin-bottom: 28px;
+    }
+
+    .defile-feature-reverse .defile-feature-art,
+    .defile-feature-reverse .defile-feature-content {
+        order: initial;
+    }
+
+    .defile-feature-art {
+        min-height: 330px;
+    }
+
+    .feature-art-frame {
+        min-height: 270px;
+    }
+
+    .feature-art-symbol {
+        font-size: 100px;
+    }
+
+    .defile-feature-content {
+        padding: 30px 25px 35px;
+    }
+
+    .defile-feature-content h3 {
+        font-size: 47px;
+    }
+
+    .defile-closing {
+        padding: 70px 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .defile-card,
+    .defile-detail-link {
+        transition: none;
+    }
+}
