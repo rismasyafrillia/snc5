@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Ticket extends Model
 {
@@ -11,6 +12,7 @@ class Ticket extends Model
         'order_item_id',
         'ticket_code',
         'qr_token_hash',
+        'qr_token',
         'status',
         'checked_in_at',
     ];
@@ -19,6 +21,7 @@ class Ticket extends Model
     {
         return [
             'checked_in_at' => 'datetime',
+            'qr_token' => 'encrypted',
         ];
     }
 
@@ -27,4 +30,3 @@ class Ticket extends Model
         return $this->belongsTo(OrderItem::class);
     }
 }
-

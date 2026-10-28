@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketOrderController;
 use App\Http\Controllers\MidtransWebhookController;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use App\Http\Controllers\CheckInController;
 
 // Beranda
 Route::view('/', 'home')->name('home');
@@ -56,3 +57,9 @@ Route::get(
     '/orders/{order_code}/status',
     [TicketOrderController::class, 'checkStatus']
 )->name('orders.status');   
+
+Route::get('/check-in', [CheckInController::class, 'index'])
+    ->name('check-in.index');
+
+Route::post('/check-in', [CheckInController::class, 'verify'])
+    ->name('check-in.verify');

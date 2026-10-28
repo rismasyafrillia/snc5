@@ -33,7 +33,7 @@
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
                 <li class="nav-item">
-                    <a class="nav-link active" href="{{ route('home') }}">Beranda</a>
+                    <a class="nav-link" href="{{ route('home') }}">Beranda</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('pages.about') }}">Tentang</a>
@@ -42,7 +42,7 @@
                     <a class="nav-link" href="{{ route('defile.index') }}">Defile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('pages.gallery') }}">Galeri</a>
+                    <a class="nav-link active" href="{{ route('pages.gallery') }}">Galeri</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('pages.event-info') }}">Info Acara</a>

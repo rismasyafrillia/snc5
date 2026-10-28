@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\TicketType;
+use App\Services\TicketIssuanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +13,10 @@ use Illuminate\Support\Facades\Log;
 
 class MidtransWebhookController extends Controller
 {
-    public function handle(Request $request): JsonResponse
-    {
+    public function handle(
+        Request $request,
+        TicketIssuanceService $ticketIssuanceService
+    ): JsonResponse {
         $notification = $request->all();
 
         $orderCode = $notification['order_id'] ?? null;
@@ -54,36 +57,22 @@ class MidtransWebhookController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($notification, $orderCode, $grossAmount) {
+            $orderId = DB::transaction(function () use ($notification, $orderCode, $grossAmount) {
                 $order = Order::query()
                     ->where('order_code', $orderCode)
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                // Samakan nominal sebagai string desimal rupiah.
-                $receivedAmount = number_format(
-                    (float) $grossAmount,
-                    2,
-                    '.',
-                    ''
-                );
-
-                $expectedAmount = number_format(
-                    (float) $order->total_amount,
-                    2,
-                    '.',
-                    ''
-                );
-
-                if ($receivedAmount !== $expectedAmount) {
+                if (
+                    number_format((float) $grossAmount, 2, '.', '') !==
+                    number_format((float) $order->total_amount, 2, '.', '')
+                ) {
                     throw new \RuntimeException(
                         'Nominal pembayaran tidak sesuai.'
                     );
                 }
 
-                $transactionStatus =
-                    $notification['transaction_status'] ?? '';
-
+                $transactionStatus = $notification['transaction_status'] ?? '';
                 $fraudStatus = $notification['fraud_status'] ?? null;
 
                 $payment = Payment::query()
@@ -99,24 +88,13 @@ class MidtransWebhookController extends Controller
                 }
 
                 $payment->transaction_id =
-                    $notification['transaction_id']
-                    ?? $payment->transaction_id;
+                    $notification['transaction_id'] ?? $payment->transaction_id;
 
                 $payment->payment_type =
-                    $notification['payment_type']
-                    ?? $payment->payment_type;
+                    $notification['payment_type'] ?? $payment->payment_type;
 
                 $payment->gross_amount = $order->total_amount;
                 $payment->raw_status = $notification;
-
-                // Status paid tidak boleh diturunkan oleh notifikasi lama.
-                if ($order->status === 'paid') {
-                    $payment->transaction_status = 'settlement';
-                    $payment->paid_at ??= $order->paid_at ?? now();
-                    $payment->save();
-
-                    return;
-                }
 
                 $isPaid = $transactionStatus === 'settlement'
                     || (
@@ -124,9 +102,15 @@ class MidtransWebhookController extends Controller
                         && $fraudStatus === 'accept'
                     );
 
+                // Pesanan yang sudah dibayar tetap bisa diproses ulang
+                // untuk mencoba kembali pengiriman email yang gagal.
+                if ($order->status === 'paid') {
+                    $payment->save();
+
+                    return $order->id;
+                }
+
                 if ($isPaid) {
-                    // Jangan tandai pembayaran berhasil jika pesanan
-                    // sudah dibatalkan atau kedaluwarsa.
                     if ($order->status !== 'pending') {
                         throw new \RuntimeException(
                             'Pembayaran berhasil diterima untuk pesanan yang sudah berakhir; perlu pemeriksaan manual.'
@@ -148,20 +132,16 @@ class MidtransWebhookController extends Controller
                             ->firstOrFail();
 
                         if (
-                            (int) $ticketType->reserved_quantity
-                            < (int) $item->quantity
+                            (int) $ticketType->reserved_quantity <
+                            (int) $item->quantity
                         ) {
                             throw new \RuntimeException(
                                 'Jumlah reservasi tiket tidak sesuai.'
                             );
                         }
 
-                        $ticketType->reserved_quantity -=
-                            (int) $item->quantity;
-
-                        $ticketType->sold_quantity +=
-                            (int) $item->quantity;
-
+                        $ticketType->reserved_quantity -= (int) $item->quantity;
+                        $ticketType->sold_quantity += (int) $item->quantity;
                         $ticketType->save();
                     }
 
@@ -170,18 +150,15 @@ class MidtransWebhookController extends Controller
 
                     $payment->transaction_status = $transactionStatus;
                     $payment->paid_at = now();
+
                 } elseif (
                     in_array(
                         $transactionStatus,
                         ['expire', 'cancel', 'deny', 'failure'],
                         true
-                    )
-                    && $order->status === 'pending'
+                    ) && $order->status === 'pending'
                 ) {
-                    // Lepaskan reservasi di transaksi database yang sama.
-                    $items = $order->items()->get();
-
-                    foreach ($items as $item) {
+                    foreach ($order->items()->get() as $item) {
                         $ticketType = TicketType::query()
                             ->whereKey($item->ticket_type_id)
                             ->lockForUpdate()
@@ -189,31 +166,42 @@ class MidtransWebhookController extends Controller
 
                         $ticketType->reserved_quantity = max(
                             0,
-                            (int) $ticketType->reserved_quantity
-                                - (int) $item->quantity
+                            (int) $ticketType->reserved_quantity -
+                                (int) $item->quantity
                         );
 
                         $ticketType->save();
                     }
 
-                    $order->status = in_array(
-                        $transactionStatus,
-                        ['expire'],
-                        true
-                    ) ? 'expired' : 'cancelled';
+                    $order->status = $transactionStatus === 'expire'
+                        ? 'expired'
+                        : 'cancelled';
 
                     $payment->transaction_status = $transactionStatus;
+
                 } else {
+                    // Jangan menurunkan status pesanan terminal karena
+                    // notifikasi pending atau notifikasi lama.
                     $payment->transaction_status = $transactionStatus;
                 }
 
                 $order->save();
                 $payment->save();
+
+                return $order->id;
             });
+
+            // Transaksi database sudah selesai sebelum email dikirim.
+            $order = Order::findOrFail($orderId);
+
+            if ($order->status === 'paid') {
+                $ticketIssuanceService->issueAndSend($order->id);
+            }
 
             return response()->json([
                 'message' => 'Notifikasi diproses.',
             ]);
+
         } catch (\Throwable $e) {
             Log::error('Webhook Midtrans gagal diproses', [
                 'order_id' => $orderCode,
