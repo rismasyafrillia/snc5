@@ -394,10 +394,6 @@
 
             </div>
 
-            <p class="ticket-note text-center mt-4">
-                Nama kategori, fasilitas, dan ketersediaan tiket perlu disesuaikan
-                dengan ketentuan resmi penyelenggara.
-            </p>
         </div>
     </section>
 
