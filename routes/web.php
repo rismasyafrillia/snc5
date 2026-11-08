@@ -1,8 +1,8 @@
-
 <?php
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\DeployWebhookController;
 use App\Http\Controllers\TicketOrderController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +49,9 @@ Route::get(
     '/orders/{order_code}/status',
     [TicketOrderController::class, 'checkStatus']
 )->name('orders.status');
+
+Route::post('/deploy/github-webhook', [DeployWebhookController::class, 'handle'])
+    ->name('deploy.github-webhook');
 
 Route::get('/check-in', [CheckInController::class, 'index'])
     ->name('check-in.index');

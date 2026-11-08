@@ -38,4 +38,8 @@ return [
         'merchant_payload' => env('QRIS_MERCHANT_PAYLOAD'),
     ],
 
+    'github_deploy' => [
+        'webhook_secret' => env('GITHUB_DEPLOY_WEBHOOK_SECRET'),
+    ],
+
 ];

@@ -1,0 +1,88 @@
+services:
+  app:
+    image: snc5-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: snc5_app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./storage/app/public:/var/www/storage/app/public
+    env_file:
+      - .env
+    networks:
+      - snc5-network
+    depends_on:
+      - db
+
+  web:
+    image: nginx:alpine
+    container_name: snc5_web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - snc5-network
+
+  db:
+    image: mysql:8.0
+    container_name: snc5_db
+    restart: unless-stopped
+    command: --innodb-buffer-pool-size=128M --max-connections=50
+    mem_limit: 400m
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - snc5-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: snc5_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 100M
+    depends_on:
+      - db
+    networks:
+      - snc5-network
+
+  queue:
+    image: snc5-app:latest
+    container_name: snc5_queue
+    restart: unless-stopped
+    working_dir: /var/www
+    command: php artisan queue:work database --sleep=2 --tries=1 --timeout=600 --max-time=3600
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www
+      - ./storage/app/public:/var/www/storage/app/public
+    depends_on:
+      - app
+      - db
+    networks:
+      - snc5-network
+
+networks:
+  snc5-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
