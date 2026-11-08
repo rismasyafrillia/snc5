@@ -363,6 +363,9 @@
     position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
+    background: var(--cream);
+    border: 1px solid rgba(70, 19, 31, 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .program-art-image {
