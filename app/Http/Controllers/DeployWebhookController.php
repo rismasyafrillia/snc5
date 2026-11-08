@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class DeployWebhookController extends Controller
 {
-    public function handle(Request $request): Response
+    public function handle(Request $request): JsonResponse
     {
         $secret = (string) config('services.github_deploy.webhook_secret');
         $signature = (string) $request->header('X-Hub-Signature-256');
