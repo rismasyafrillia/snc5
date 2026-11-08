@@ -476,6 +476,84 @@ a {
     letter-spacing: 1px;
 }
 
+.snc-footer {
+    overflow: hidden;
+    padding: 38px 0 24px;
+    border-top: 1px solid rgba(201, 167, 106, 0.35);
+    background: var(--maroon-dark);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.snc-footer .footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(201, 167, 106, 0.2);
+}
+
+.snc-footer .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.snc-footer .brand-mark {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: "Cormorant Garamond", serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+}
+
+.snc-footer .brand-name {
+    font-size: 10px;
+    line-height: 1.6;
+    letter-spacing: 1px;
+}
+
+.snc-footer .footer-identity p {
+    margin: 14px 0 0;
+    font-size: 10px;
+    line-height: 1.8;
+}
+
+.snc-footer .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 18px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 9px;
+    line-height: 1.6;
+}
+
+.snc-footer .contact-person {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(201, 167, 106, 0.15);
+}
+
+.contact-person {
+    margin: 12px 0 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.contact-person a {
+    color: var(--gold);
+    font-weight: 700;
+    text-underline-offset: 3px;
+}
+
 @media (max-width: 991px) {
     .snc-navbar {
         padding: 14px 0;
@@ -535,6 +613,17 @@ a {
     }
 
     .site-footer {
+        text-align: center;
+    }
+
+    .snc-footer {
+        padding: 32px 0 20px;
+    }
+
+    .snc-footer .footer-content,
+    .snc-footer .footer-bottom {
+        align-items: center;
+        flex-direction: column;
         text-align: center;
     }
 }

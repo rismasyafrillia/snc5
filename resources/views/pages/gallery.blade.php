@@ -87,10 +87,8 @@
         <div class="gallery-grid">
             <article class="gallery-card gallery-card-large">
                 <div class="gallery-art art-puspawara">
+                    <img class="gallery-photo" src="{{ asset('images/puspawara.png') }}" alt="Penampilan Defile Puspawara di panggung karnaval" loading="lazy" decoding="async">
                     <span class="art-number">01</span>
-                    <div class="art-orbit orbit-one"></div>
-                    <div class="art-orbit orbit-two"></div>
-                    <div class="art-flower">✺</div>
                     <span class="art-caption">SACRED HERITAGE</span>
                 </div>
                 <div class="gallery-card-info">
@@ -104,10 +102,8 @@
 
             <article class="gallery-card">
                 <div class="gallery-art art-maharajani">
+                    <img class="gallery-photo" src="{{ asset('images/maharajani.png') }}" alt="Pasangan kerajaan dalam Defile Maharajani" loading="lazy" decoding="async">
                     <span class="art-number">02</span>
-                    <div class="art-crown">♛</div>
-                    <div class="art-sparkle sparkle-one">✦</div>
-                    <div class="art-sparkle sparkle-two">✧</div>
                     <span class="art-caption">ROYAL ROMANCE</span>
                 </div>
                 <div class="gallery-card-info">
@@ -121,11 +117,8 @@
 
             <article class="gallery-card">
                 <div class="gallery-art art-fantasia">
+                    <img class="gallery-photo" src="{{ asset('images/asmarafantasia.png') }}" alt="Kostum fantasi dan pasangan dalam Defile Asmara Fantasia" loading="lazy" decoding="async">
                     <span class="art-number">03</span>
-                    <div class="fantasia-moon">☾</div>
-                    <div class="fantasia-star star-one">✦</div>
-                    <div class="fantasia-star star-two">✧</div>
-                    <div class="fantasia-star star-three">✦</div>
                     <span class="art-caption">ENCHANTED UNIVERSE</span>
                 </div>
                 <div class="gallery-card-info">
@@ -139,31 +132,18 @@
 
             <article class="gallery-card gallery-card-wide">
                 <div class="gallery-art art-asmaradana">
+                    <img class="gallery-photo" src="{{ asset('images/carnival-placeholder.png') }}" alt="Dua peserta berkostum di panggung Sparkling Nganjuk Carnival" loading="lazy" decoding="async">
                     <span class="art-number">04</span>
-                    <div class="asmaradana-symbol">❋</div>
-                    <div class="asmaradana-copy">
-                        <span>SPARKLING NGANJUK CARNIVAL #5</span>
-                        <h3>ASMARADANA</h3>
-                        <p>The Symphony of Love</p>
-                    </div>
+                    <span class="art-caption">SPARKLING NGANJUK CARNIVAL #5</span>
                 </div>
                 <div class="gallery-card-info">
                     <div>
-                        <span>THE 2026 THEME</span>
-                        <h3>Merayakan Cinta</h3>
+                        <span>MOMEN KARNAVAL</span>
+                        <h3>Di Atas Panggung</h3>
                     </div>
-                    <p>Menyatukan budaya, menyambut kehidupan baru.</p>
+                    <p>Warna dan busana yang memeriahkan perayaan.</p>
                 </div>
             </article>
-        </div>
-
-        <div class="gallery-note">
-            <span class="gallery-note-icon">✦</span>
-            <p>
-                <strong>Galeri dokumentasi akan segera hadir.</strong><br>
-                Visual di atas merupakan ilustrasi dekoratif sementara,
-                bukan dokumentasi resmi kegiatan.
-            </p>
         </div>
     </div>
 </section>
@@ -186,6 +166,9 @@
         <p>ASMARADANA — The Symphony of Love</p>
 
         <p>© {{ date('Y') }} Sparkling Nganjuk Carnival.</p>
+    </div>
+    <div class="container">
+        @include('partials.contact-person')
     </div>
 </footer>
 

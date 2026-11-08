@@ -85,22 +85,10 @@
             </a>
         </div>
 
-        <div class="fantasia-art" aria-hidden="true">
-            <div class="fantasia-orbit orbit-one"></div>
-            <div class="fantasia-orbit orbit-two"></div>
-            <div class="fantasia-orbit orbit-three"></div>
-
-            <div class="fantasia-moon">☾</div>
-            <div class="fantasia-flower flower-one">✿</div>
-            <div class="fantasia-flower flower-two">✺</div>
-
-            <span class="fantasia-star star-one">✦</span>
-            <span class="fantasia-star star-two">✧</span>
-            <span class="fantasia-star star-three">✦</span>
-            <span class="fantasia-star star-four">✧</span>
-
-            <span class="fantasia-art-caption">IMAGINATION · WONDER · LOVE</span>
-        </div>
+        <figure class="fantasia-art defile-photo-art">
+            <img src="{{ asset('images/asmarafantasia.png') }}" alt="Kostum fantasi dan pasangan dalam dunia imajinatif Asmara Fantasia" loading="eager" decoding="async">
+            <figcaption class="fantasia-art-caption">IMAGINATION · WONDER · LOVE</figcaption>
+        </figure>
     </div>
 
     <div class="fantasia-index">03 / 03</div>
@@ -326,37 +314,7 @@
 </section>
 
 {{-- FOOTER --}}
-<footer class="snc-footer">
-    <div class="container">
-        <div class="footer-content">
-            <div>
-                <a class="navbar-brand footer-brand" href="{{ route('home') }}">
-                    <span class="brand-mark">SNC</span>
-                    <span class="brand-name">
-                        SPARKLING NGANJUK<br>CARNIVAL #5
-                    </span>
-                </a>
-
-                <p>
-                    Merayakan Cinta, Menyatukan Budaya,<br>
-                    Menyambut Kehidupan Baru.
-                </p>
-            </div>
-
-            <div class="footer-links">
-                <a href="{{ route('pages.about') }}">Tentang</a>
-                <a href="{{ route('defile.index') }}">Defile</a>
-                <a href="{{ route('pages.gallery') }}">Galeri</a>
-                <a href="{{ route('pages.event-info') }}">Info Acara</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <span>© {{ date('Y') }} Sparkling Nganjuk Carnival #5</span>
-            <span>ASMARADANA — The Symphony of Love</span>
-        </div>
-    </div>
-</footer>
+@include('partials.defile-footer')
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

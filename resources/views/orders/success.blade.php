@@ -195,6 +195,13 @@
                     @endif
                 </p>
 
+                <div class="success-support">
+                    <p class="success-spam-note">
+                        Jika tiket belum muncul di email, periksa folder Spam.
+                    </p>
+                    @include('partials.contact-person')
+                </div>
+
                 <a href="{{ route('home') }}" class="success-home-btn">
                     Kembali ke Beranda <span>↗</span>
                 </a>

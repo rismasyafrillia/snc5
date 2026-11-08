@@ -147,12 +147,10 @@
 
             <!-- PUSPAWARA -->
             <article class="defile-feature defile-feature-one">
-                <div class="defile-feature-art">
-                    <div class="feature-art-frame">
-                        <span class="feature-art-number">01</span>
-                        <span class="feature-art-symbol">❋</span>
-                        <span class="feature-art-caption">THE SACRED WEDDING HERITAGE</span>
-                    </div>
+                <div class="defile-feature-art feature-photo">
+                    <img src="{{ asset('images/puspawara.png') }}" alt="Penampilan Defile Puspawara dalam busana tradisional" loading="lazy" decoding="async">
+                    <span class="feature-art-number">01</span>
+                    <span class="feature-art-caption">THE SACRED WEDDING HERITAGE</span>
                 </div>
 
                 <div class="defile-feature-content">
@@ -185,12 +183,10 @@
 
             <!-- MAHARAJANI -->
             <article class="defile-feature defile-feature-reverse defile-feature-two">
-                <div class="defile-feature-art">
-                    <div class="feature-art-frame">
-                        <span class="feature-art-number">02</span>
-                        <span class="feature-art-symbol">♛</span>
-                        <span class="feature-art-caption">THE ROYAL ROMANCE OF NUSANTARA</span>
-                    </div>
+                <div class="defile-feature-art feature-photo">
+                    <img src="{{ asset('images/maharajani.png') }}" alt="Penampilan pasangan kerajaan dalam Defile Maharajani" loading="lazy" decoding="async">
+                    <span class="feature-art-number">02</span>
+                    <span class="feature-art-caption">THE ROYAL ROMANCE OF NUSANTARA</span>
                 </div>
 
                 <div class="defile-feature-content">
@@ -223,12 +219,10 @@
 
             <!-- ASMARA FANTASIA -->
             <article class="defile-feature defile-feature-three">
-                <div class="defile-feature-art">
-                    <div class="feature-art-frame">
-                        <span class="feature-art-number">03</span>
-                        <span class="feature-art-symbol">✧</span>
-                        <span class="feature-art-caption">THE ENCHANTED UNIVERSE OF LOVE</span>
-                    </div>
+                <div class="defile-feature-art feature-photo">
+                    <img src="{{ asset('images/asmarafantasia.png') }}" alt="Kostum fantasi dan pasangan dalam Defile Asmara Fantasia" loading="lazy" decoding="async">
+                    <span class="feature-art-number">03</span>
+                    <span class="feature-art-caption">THE ENCHANTED UNIVERSE OF LOVE</span>
                 </div>
 
                 <div class="defile-feature-content">
@@ -294,6 +288,9 @@
         <p>ASMARADANA — The Symphony of Love</p>
 
         <p>© {{ date('Y') }} Sparkling Nganjuk Carnival.</p>
+    </div>
+    <div class="container">
+        @include('partials.contact-person')
     </div>
 </footer>
 

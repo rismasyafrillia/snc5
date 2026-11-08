@@ -300,6 +300,9 @@
             <p>© {{ date('Y') }} Sparkling Nganjuk Carnival #5</p>
             <p>ASMARADANA — The Symphony of Love</p>
         </div>
+        <div class="container">
+            @include('partials.contact-person')
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
