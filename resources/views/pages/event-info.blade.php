@@ -209,10 +209,14 @@
             <div class="row g-4 mt-4">
                 <div class="col-lg-8 mx-auto">
                     <article class="program-card">
-                        <div class="program-art program-art-carnival">
-                            <span class="program-art-number">01</span>
-                            <span class="program-art-symbol">✧</span>
-                            <span class="program-art-caption">ART · FASHION · CULTURE</span>
+                        <div class="program-art">
+                            <img
+                                src="{{ asset('images/info.png') }}"
+                                alt="Suasana seni dan pertunjukan Sparkling Nganjuk Carnival"
+                                class="program-art-image"
+                                loading="lazy"
+                                decoding="async"
+                            >
                         </div>
 
                         <div class="program-card-body">
