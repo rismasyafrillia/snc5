@@ -88,8 +88,8 @@
                 <div class="col-lg-6">
                     <div class="about-image-frame">
                         <img
-                            src="{{ asset('images/about-snc.jpg') }}"
-                            alt="Ilustrasi perayaan seni dan budaya Indonesia"
+                            src="{{ asset('images/carnival-placeholder.png') }}"
+                            alt="Penampilan busana carnival di Sparkling Nganjuk Carnival"
                             class="about-main-image"
                         >
                         <div class="about-image-label">

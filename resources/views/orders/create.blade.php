@@ -84,6 +84,11 @@
                 <p class="section-eyebrow">TICKET RESERVATION</p>
                 <h2>Pemesanan <em>Tiket</em></h2>
                 <p>Pilih tiket dan lengkapi data pemesan untuk melanjutkan.</p>
+                <div class="ticketing-brand ticketing-brand-text">
+                    <span>Ticketing by</span>
+                    <strong>SWATANTRA</strong>
+                    <small>CREATIVE EVENT</small>
+                </div>
             </div>
 
             @if ($errors->any())
@@ -126,16 +131,37 @@
                                                 <strong>Rp{{ number_format($ticket->price, 0, ',', '.') }}</strong>
                                             </div>
                                         </div>
-
+   
                                         @if ($ticket->description)
                                             <p class="ticket-description">{{ $ticket->description }}</p>
                                         @endif
 
-                                        <input
-                                            type="hidden"
-                                            name="items[{{ $index }}][ticket_type_id]"
-                                            value="{{ $ticket->id }}"
-                                        >
+                                        @php
+                                            $remaining = max(
+                                                0,
+                                                $ticket->quota
+                                                - $ticket->reserved_quantity
+                                                - $ticket->sold_quantity
+                                            );
+                                            $soldOut = $remaining <= 0 || $ticket->status !== 'active';
+                                        @endphp
+
+                                        <div class="ticket-availability {{ $soldOut ? 'sold-out' : '' }}">
+                                            @if ($soldOut)
+                                                <span class="availability-dot"></span>
+                                                <strong>
+                                                    {{ $ticket->status !== 'active' ? 'Penjualan Ditutup' : 'Sold Out' }}
+                                                </strong>
+                                            @endif
+                                        </div>
+
+                                        @unless ($soldOut)
+                                            <input
+                                                type="hidden"
+                                                name="items[{{ $index }}][ticket_type_id]"
+                                                value="{{ $ticket->id }}"
+                                            >
+                                        @endunless
 
                                         <div class="ticket-quantity-row">
                                             <label for="quantity_{{ $ticket->id }}">
@@ -155,17 +181,21 @@
                                                     id="quantity_{{ $ticket->id }}"
                                                     name="items[{{ $index }}][quantity]"
                                                     min="0"
-                                                    max="10"
-                                                    value="{{ old('items.'.$index.'.quantity', 0) }}"
+                                                    max="{{ $soldOut ? 0 : min(10, $remaining) }}"
+                                                    value="{{ $soldOut ? 0 : old('items.'.$index.'.quantity', 0) }}"
                                                     required
                                                     data-price="{{ $ticket->price }}"
+                                                    {{ $soldOut ? 'disabled' : '' }}
                                                 >
 
-                                                <button type="button"
+                                                <button
+                                                    type="button"
                                                     class="quantity-btn"
                                                     data-action="increase"
                                                     data-target="quantity_{{ $ticket->id }}"
-                                                    aria-label="Tambah jumlah tiket">+</button>
+                                                    aria-label="Tambah jumlah tiket"
+                                                    {{ $soldOut ? 'disabled' : '' }}
+                                                >+</button>
                                             </div>
                                         </div>
                                     </article>
@@ -273,6 +303,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const quantityInputs = document.querySelectorAll('.quantity-input');
@@ -288,23 +319,34 @@
                 let total = 0;
 
                 quantityInputs.forEach(function (input) {
-                    const count = Math.max(0, Math.min(10, Number(input.value) || 0));
+                    const count = Math.max(
+                        0,
+                        Math.min(
+                            Number(input.max) || 0,
+                            Number(input.value) || 0
+                        )
+                    );
+
                     const price = Number(input.dataset.price) || 0;
 
                     quantity += count;
                     total += count * price;
                 });
 
-                totalQuantity.textContent = quantity + (quantity === 1 ? ' tiket' : ' tiket');
+                totalQuantity.textContent = quantity + ' tiket';
                 totalPrice.textContent = formatRupiah(total);
             }
 
             quantityInputs.forEach(function (input) {
                 input.addEventListener('input', updateSummary);
+
                 input.addEventListener('change', function () {
+                    const max = Number(input.max) || 0;
                     let value = Number(input.value) || 0;
-                    value = Math.max(0, Math.min(10, value));
+
+                    value = Math.max(0, Math.min(max, value));
                     input.value = value;
+
                     updateSummary();
                 });
             });
@@ -312,12 +354,14 @@
             document.querySelectorAll('.quantity-btn').forEach(function (button) {
                 button.addEventListener('click', function () {
                     const input = document.getElementById(button.dataset.target);
-                    if (!input) return;
 
+                    if (!input || input.disabled) return;
+
+                    const max = Number(input.max) || 0;
                     let value = Number(input.value) || 0;
 
                     if (button.dataset.action === 'increase') {
-                        value = Math.min(10, value + 1);
+                        value = Math.min(max, value + 1);
                     } else {
                         value = Math.max(0, value - 1);
                     }

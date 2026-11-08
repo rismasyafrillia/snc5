@@ -6,6 +6,12 @@
     <title>E-Tiket Sparkling Nganjuk Carnival #5</title>
 </head>
 <body style="font-family: Arial, sans-serif; color: #222; line-height: 1.6;">
+    <div style="margin-bottom: 24px; text-align: center;">
+        <p style="margin: 0 0 8px; color: #666; font-size: 12px;">Ticketing by</p>
+        <p style="margin: 0; color: #46131f; font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 3px;">SWATANTRA</p>
+        <p style="margin: 4px 0 0; color: #9b7742; font-size: 10px; font-weight: 700; letter-spacing: 2px;">CREATIVE EVENT</p>
+    </div>
+
     <h2>Pembayaran Berhasil!</h2>
 
     <p>Halo {{ $order->buyer_name }},</p>
@@ -19,6 +25,13 @@
     <p>
         <strong>Kode Pesanan:</strong>
         {{ $order->order_code }}
+    </p>
+
+    <p style="margin: 24px 0; padding: 16px; border-left: 3px solid #c9a76a; background: #fffaf2;">
+        <strong>Penukaran tiket</strong><br>
+        Sabtu, 21 November 2026<br>
+        Stadion Anjuk Ladang<br>
+        Pukul 12.00–19.00 WIB
     </p>
 
     <p>

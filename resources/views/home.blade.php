@@ -343,55 +343,20 @@
                 </h2>
 
                 <p class="body-copy mt-3">
-                    Pilih tiketmu dan bersiaplah menjadi bagian dari
-                    Sparkling Nganjuk Carnival #5.
+                    Satu cara untuk hadir lebih dekat di Sparkling Nganjuk Carnival #5:
+                    amankan tiket VIP-mu sekarang.
                 </p>
             </div>
 
-            <div class="row g-4 mt-3">
-
-                <div class="col-md-4">
-                    <article class="ticket-card">
-                        <p class="ticket-number">01 / TICKET</p>
-                        <h3>Premium</h3>
-                        <p class="ticket-price">Rp50.000</p>
-                        <p class="ticket-description">
-                            Pilihan tiket untuk menikmati perayaan ASMARADANA.
-                        </p>
-                        <a href="{{ route('orders.create') }}" class="btn btn-ticket">
-                            Pilih Tiket <span>↗</span>
-                        </a>
-                    </article>
+            <div class="ticket-invitation">
+                <div>
+                    <p class="ticket-number">VIP ACCESS</p>
+                    <h3>Amankan Tiket VIP-mu</h3>
+                    <p>
+                        Bersiaplah menjadi bagian dari malam penuh seni, budaya,
+                        dan cerita di ASMARADANA.
+                    </p>
                 </div>
-
-                <div class="col-md-4">
-                    <article class="ticket-card ticket-card-featured">
-                        <p class="ticket-number">02 / TICKET</p>
-                        <h3>Regular</h3>
-                        <p class="ticket-price">Rp30.000</p>
-                        <p class="ticket-description">
-                            Nikmati pengalaman Sparkling Nganjuk Carnival #5.
-                        </p>
-                        <a href="{{ route('orders.create') }}" class="btn btn-ticket">
-                            Pilih Tiket <span>↗</span>
-                        </a>
-                    </article>
-                </div>
-
-                <div class="col-md-4">
-                    <article class="ticket-card">
-                        <p class="ticket-number">03 / TICKET</p>
-                        <h3>Festival</h3>
-                        <p class="ticket-price">Rp15.000</p>
-                        <p class="ticket-description">
-                            Jadilah bagian dari kemeriahan perayaan budaya dan seni.
-                        </p>
-                        <a href="{{ route('orders.create') }}" class="btn btn-ticket">
-                            Pilih Tiket <span>↗</span>
-                        </a>
-                    </article>
-                </div>
-
             </div>
 
         </div>

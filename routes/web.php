@@ -1,11 +1,10 @@
 
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TicketOrderController;
-use App\Http\Controllers\MidtransWebhookController;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\TicketOrderController;
+use Illuminate\Support\Facades\Route;
 
 // Beranda
 Route::view('/', 'home')->name('home');
@@ -41,25 +40,57 @@ Route::get('/orders/{order_code}/success', [
     'success',
 ])->name('orders.success');
 
-Route::post('/orders/{order_code}/payment-token', [
+Route::get('/orders/{order_code}/payment', [
     TicketOrderController::class,
-    'paymentToken',
-])->name('orders.payment-token');
-
-Route::post('/midtrans/webhook', [
-    MidtransWebhookController::class,
-    'handle',
-])
-    ->withoutMiddleware([ValidateCsrfToken::class])
-    ->name('midtrans.webhook');
+    'payment',
+])->name('orders.payment');
 
 Route::get(
     '/orders/{order_code}/status',
     [TicketOrderController::class, 'checkStatus']
-)->name('orders.status');   
+)->name('orders.status');
 
 Route::get('/check-in', [CheckInController::class, 'index'])
     ->name('check-in.index');
 
 Route::post('/check-in', [CheckInController::class, 'verify'])
     ->name('check-in.verify');
+
+// Login admin
+Route::get('/admin/login', [
+    AdminController::class,
+    'login',
+])->name('admin.login');
+
+Route::post('/admin/login', [
+    AdminController::class,
+    'authenticate',
+])->name('admin.authenticate');
+
+// Dashboard admin
+Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [
+        AdminController::class,
+        'dashboard',
+    ])->name('dashboard');
+
+    Route::get('/check-ins/export', [
+        AdminController::class,
+        'exportCheckedInTickets',
+    ])->name('check-ins.export');
+
+    Route::put('/tickets/{ticketType}', [
+        AdminController::class,
+        'updateTicket',
+    ])->name('tickets.update');
+
+    Route::post('/orders/{order}/confirm-payment', [
+        AdminController::class,
+        'confirmPayment',
+    ])->name('orders.confirm-payment');
+
+    Route::post('/logout', [
+        AdminController::class,
+        'logout',
+    ])->name('logout');
+});

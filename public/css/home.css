@@ -864,6 +864,38 @@ a {
     margin: 0 auto;
 }
 
+.ticket-invitation {
+    display: flex;
+    max-width: 900px;
+    margin: 38px auto 0;
+    padding: 28px 0;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    border-top: 1px solid rgba(70, 19, 31, 0.18);
+    border-bottom: 1px solid rgba(70, 19, 31, 0.18);
+    text-align: center;
+}
+
+.ticket-invitation h3 {
+    margin: 8px 0;
+    color: var(--maroon);
+    font-family: "Cormorant Garamond", serif;
+    font-size: 34px;
+    font-weight: 600;
+}
+
+.ticket-invitation p:not(.ticket-number) {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.ticket-invitation .btn span {
+    margin-left: 12px;
+}
+
 .ticket-card {
     height: 100%;
     padding: 35px 28px;
@@ -936,6 +968,19 @@ a {
     color: var(--muted);
     font-size: 10px;
     line-height: 1.8;
+}
+
+@media (max-width: 600px) {
+    .ticket-invitation {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .ticket-invitation h3 {
+        font-size: 30px;
+    }
 }
 
 /* Final call to action */

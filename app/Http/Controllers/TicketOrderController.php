@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\TicketType;
+use App\Services\QrisPaymentService;
 use App\Services\TicketOrderService;
-use App\Services\MidtransPaymentService;
+use App\Services\TicketQrService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 
 class TicketOrderController extends Controller
 {
@@ -35,8 +36,7 @@ class TicketOrderController extends Controller
 
     public function store(
         Request $request,
-        TicketOrderService $ticketOrderService,
-        MidtransPaymentService $midtransPaymentService
+        TicketOrderService $ticketOrderService
     ): RedirectResponse {
         $data = $request->validate([
             'event_id' => [
@@ -80,36 +80,51 @@ class TicketOrderController extends Controller
 
         $order = $ticketOrderService->create($data);
 
-        try {
-            $paymentUrl = $midtransPaymentService
-                ->createSnapRedirectUrl($order);
-
-            return redirect()->away($paymentUrl);
-        } catch (\Throwable $e) {
-            Log::error('Gagal membuat URL pembayaran Midtrans', [
-                'order_code' => $order->order_code,
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()
-                ->route('orders.success', [
-                    'order_code' => $order->order_code,
-                ])
-                ->with(
-                    'payment_error',
-                    'Pembayaran belum dapat dibuka. Silakan coba lagi melalui halaman pesanan.'
-                );
-        }
+        return redirect()->route('orders.payment', [
+            'order_code' => $order->order_code,
+        ]);
     }
 
-    public function success(string $order_code): View
+    public function success(string $order_code): RedirectResponse
     {
+        return redirect()->route('orders.payment', [
+            'order_code' => $order_code,
+        ]);
+    }
+
+    public function payment(
+        string $order_code,
+        QrisPaymentService $qrisPaymentService,
+        TicketQrService $ticketQrService
+    ): View {
         $order = Order::query()
             ->with(['event', 'items.ticketType'])
             ->where('order_code', $order_code)
             ->firstOrFail();
 
-        return view('orders.success', compact('order'));
+        $paymentQrImage = null;
+        $paymentError = null;
+
+        if ($order->status === 'pending') {
+            try {
+                $payload = $qrisPaymentService->createDynamicPayload($order);
+                $qrisPaymentService->recordPendingPayment($order);
+                $paymentQrImage = base64_encode($ticketQrService->generate($payload));
+            } catch (\Throwable $e) {
+                Log::error('Gagal menyiapkan pembayaran QRIS', [
+                    'order_code' => $order->order_code,
+                    'error' => $e->getMessage(),
+                ]);
+
+                $paymentError = 'Pembayaran QRIS belum tersedia. Silakan hubungi penyelenggara.';
+            }
+        }
+
+        return view('orders.success', compact(
+            'order',
+            'paymentQrImage',
+            'paymentError'
+        ));
     }
 
     public function checkStatus(string $order_code)

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Pesanan Berhasil - SNC #5</title>
+    <title>Pembayaran - SNC #5</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,12 +14,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/home.css') }}">
     <link rel="stylesheet" href="{{ asset('css/order.css') }}">
-    @if ($order->status === 'pending')
-        <script
-            src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('services.midtrans.client_key') }}">
-        </script>
-    @endif
 </head>
 <body class="order-page success-page">
 
@@ -52,40 +46,63 @@
 
                 <p class="section-eyebrow">ORDER CONFIRMATION</p>
 
-                <h1>Pesanan <em>Berhasil</em><br>Dibuat.</h1>
+                @if ($order->status === 'pending')
+                    <h1>Menunggu <em>Pembayaran</em></h1>
+                @elseif ($order->status === 'paid')
+                    <h1>Pembayaran <em>Terkonfirmasi</em></h1>
+                @else
+                    <h1>Status <em>Pesanan</em></h1>
+                @endif
 
                 <p class="success-description">
                     Terima kasih telah menjadi bagian dari Sparkling Nganjuk Carnival #5.
                     Pesanan tiketmu sudah tercatat dalam sistem.
                 </p>
 
+                <div class="ticketing-brand ticketing-brand-text">
+                    <span>Ticketing by</span>
+                    <strong>SWATANTRA</strong>
+                    <small>CREATIVE EVENT</small>
+                </div>
+
                 <div class="order-code-box">
                     <span>KODE PESANAN</span>
                     <strong>{{ $order->order_code }}</strong>
                 </div>
 
-                            @if ($order->status === 'pending')
+                @if ($order->status === 'pending')
+                @if ($paymentQrImage)
+                    <div class="qris-payment">
+                        <img
+                            class="qris-code"
+                            src="data:image/png;base64,{{ $paymentQrImage }}"
+                            alt="QRIS dinamis untuk pesanan {{ $order->order_code }}"
+                        >
+                        <p>
+                            Bayar tepat sebesar
+                            <strong>Rp{{ number_format($order->total_amount, 0, ',', '.') }}</strong>
+                            menggunakan aplikasi yang mendukung QRIS.
+                        </p>
+                    </div>
+                @elseif ($paymentError)
+                    <div class="payment-notice" role="alert">
+                        <span class="notice-symbol">!</span>
+                        <div>
+                            <strong>QRIS belum dapat ditampilkan</strong>
+                            <p>{{ $paymentError }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="payment-notice">
                     <span class="notice-symbol">!</span>
                     <div>
                         <strong>Pesanan menunggu pembayaran</strong>
                         <p>
-                            Selesaikan pembayaran melalui Midtrans sebelum batas
-                            waktu pembayaran berakhir.
+                            Setelah pembayaran berhasil, admin akan memeriksa dan mengonfirmasi transaksi secara manual.
                         </p>
                     </div>
                 </div>
-
-                <button
-                    type="button"
-                    id="pay-button"
-                    class="success-home-btn"
-                    data-token-url="{{ route('orders.payment-token', ['order_code' => $order->order_code]) }}"
-                >
-                    Bayar Sekarang <span>↗</span>
-                </button>
-
-                <p id="payment-message" role="status" aria-live="polite"></p>
             @elseif ($order->status === 'paid')
                 <div class="payment-notice">
                     <span class="notice-symbol">✓</span>
@@ -171,8 +188,11 @@
                 </div>
 
                 <p class="success-disclaimer">
-                    Halaman ini merupakan konfirmasi bahwa pesanan telah tercatat,
-                    bukan bukti bahwa pembayaran telah berhasil.
+                    @if ($order->status === 'pending')
+                        Pembayaran akan dinyatakan lunas setelah diverifikasi oleh admin.
+                    @else
+                        Simpan kode pesanan ini untuk referensi tiket.
+                    @endif
                 </p>
 
                 <a href="{{ route('home') }}" class="success-home-btn">
@@ -189,105 +209,5 @@
         </div>
     </main>
 
-    @if ($order->status === 'pending')
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const payButton = document.getElementById('pay-button');
-        const message = document.getElementById('payment-message');
-
-        if (!payButton) return;
-
-        payButton.addEventListener('click', async function () {
-            payButton.disabled = true;
-            message.textContent = 'Menyiapkan pembayaran...';
-
-            try {
-                const response = await fetch(payButton.dataset.tokenUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.token) {
-                    throw new Error(
-                        data.message || 'Gagal menyiapkan pembayaran.'
-                    );
-                }
-
-                window.snap.pay(data.token, {
-                    onSuccess: async function () {
-                    message.textContent =
-                        'Pembayaran berhasil diproses. Memverifikasi status pesanan...';
-
-                    const statusUrl = @json(
-                        route('orders.status', ['order_code' => $order->order_code])
-                    );
-
-                    let attempts = 0;
-                    const maxAttempts = 15;
-
-                    const checkPayment = async () => {
-                        try {
-                            const response = await fetch(statusUrl, {
-                                headers: {
-                                    'Accept': 'application/json'
-                                },
-                                cache: 'no-store'
-                            });
-
-                            if (!response.ok) {
-                                throw new Error('Gagal memeriksa status pesanan.');
-                            }
-
-                            const data = await response.json();
-
-                            if (data.status === 'paid') {
-                                window.location.reload();
-                                return;
-                            }
-
-                            if (
-                                ['expired', 'cancelled'].includes(data.status)
-                            ) {
-                                message.textContent =
-                                    'Status pesanan: ' + data.status + '. Hubungi penyelenggara jika pembayaran sudah berhasil.';
-                                payButton.disabled = false;
-                                return;
-                            }
-
-                            attempts++;
-
-                            if (attempts < maxAttempts) {
-                                setTimeout(checkPayment, 2000);
-                            } else {
-                                message.textContent =
-                                    'Pembayaran sedang diverifikasi. Silakan muat ulang halaman beberapa saat lagi.';
-                                payButton.disabled = false;
-                            }
-                        } catch (error) {
-                            message.textContent =
-                                'Status pembayaran belum dapat diperiksa. Silakan muat ulang halaman.';
-                            payButton.disabled = false;
-                        }
-                    };
-
-                    checkPayment();
-                },
-                });
-            } catch (error) {
-                message.textContent = error.message ||
-                    'Terjadi kesalahan saat membuka pembayaran.';
-                payButton.disabled = false;
-            }
-        });
-    });
-    </script>
-    @endif
 </body>
 </html>

@@ -133,6 +133,53 @@
     line-height: 1.8;
 }
 
+.ticketing-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    margin-top: 18px;
+}
+
+.ticketing-brand span {
+    color: var(--order-muted);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.ticketing-brand img {
+    display: block;
+    width: 92px;
+    max-width: 32vw;
+    height: auto;
+    object-fit: contain;
+}
+
+.ticketing-brand-text {
+    gap: 4px;
+}
+
+.ticketing-brand-text strong {
+    color: var(--order-maroon);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.ticketing-brand-text small {
+    color: #9b7742;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.success-card .ticketing-brand {
+    margin: -8px 0 22px;
+}
+
 .order-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
@@ -697,6 +744,31 @@
     background: rgba(201, 167, 106, .08);
 }
 
+.qris-payment {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.qris-code {
+    display: block;
+    width: min(280px, 100%);
+    height: auto;
+    margin: 0 auto 12px;
+    padding: 10px;
+    border: 1px solid rgba(70, 19, 31, .12);
+    background: #fff;
+}
+
+.qris-payment p {
+    color: var(--order-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.qris-payment p strong {
+    color: var(--order-maroon);
+}
+
 .notice-symbol {
     display: grid;
     flex: 0 0 24px;
@@ -939,4 +1011,35 @@
         font-size: 8px;
         letter-spacing: 1px;
     }
+}
+
+.ticket-availability {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0;
+    color: #356b4a;
+    font-size: 13px;
+}
+
+.availability-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #3d9663;
+}
+
+.ticket-availability.sold-out {
+    color: #b42318;
+}
+
+.ticket-availability.sold-out .availability-dot {
+    background: #dc3545;
+}
+
+.quantity-btn:disabled,
+.quantity-input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }

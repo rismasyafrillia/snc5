@@ -155,17 +155,10 @@
                 <article class="event-detail-card">
                     <span class="event-detail-number">03</span>
                     <span class="event-detail-icon">⌖</span>
-                    <article class="event-detail-card">
-                        <span class="event-detail-number">03</span>
-                        <span class="event-detail-icon">⌖</span>
-                        <p class="event-detail-label">TANGGAL & WAKTU</p>
-                        <h3>21 November 2026</h3>
-                        <p class="event-detail-note">
-                            Sabtu, pukul 18.00 WIB
-                        </p>
-                    </article>
+                    <p class="event-detail-label">TANGGAL & WAKTU</p>
+                    <h3>21 November 2026</h3>
                     <p class="event-detail-note">
-                        Jadwal dan lokasi resmi akan diumumkan oleh penyelenggara.
+                        Sabtu, pukul 18.00 WIB
                     </p>
                 </article>
             </div>
@@ -209,13 +202,12 @@
                     Rangkaian <em>Perayaan</em>
                 </h2>
                 <p class="event-body">
-                    Dua ruang perayaan yang menghadirkan seni, kreativitas,
-                    serta potensi ekonomi kreatif.
+                    Perayaan seni, kreativitas, dan potensi lokal dalam satu panggung.
                 </p>
             </div>
 
             <div class="row g-4 mt-4">
-                <div class="col-lg-6">
+                <div class="col-lg-8 mx-auto">
                     <article class="program-card">
                         <div class="program-art program-art-carnival">
                             <span class="program-art-number">01</span>
@@ -237,29 +229,6 @@
                         </div>
                     </article>
                 </div>
-
-                <div class="col-lg-6">
-                    <article class="program-card">
-                        <div class="program-art program-art-fair">
-                            <span class="program-art-number">02</span>
-                            <span class="program-art-symbol">◇</span>
-                            <span class="program-art-caption">CREATIVE ECONOMY · UMKM</span>
-                        </div>
-
-                        <div class="program-card-body">
-                            <p class="event-section-eyebrow">CREATIVE ECONOMY EXPO</p>
-                            <h3>Sparkling Nganjuk Fair</h3>
-                            <p class="event-body">
-                                Ruang bazar dan pameran bagi pelaku UMKM serta
-                                ekonomi kreatif untuk memperkenalkan produk,
-                                memperluas pemasaran, dan menjangkau masyarakat.
-                            </p>
-                            <span class="event-text-note">
-                                Informasi tenant dan bazar akan diumumkan lebih lanjut.
-                            </span>
-                        </div>
-                    </article>
-                </div>
             </div>
         </div>
     </section>
@@ -275,9 +244,8 @@
                         Bagian dari <em>Cerita.</em>
                     </h2>
                     <p class="event-body mt-4">
-                        Nantikan informasi resmi mengenai jadwal, lokasi,
-                        rangkaian kegiatan, serta akses pengunjung melalui
-                        kanal informasi penyelenggara.
+                        Informasi jadwal, lokasi, dan rangkaian kegiatan untuk
+                        membantu merencanakan kehadiranmu.
                     </p>
                 </div>
 
@@ -297,15 +265,15 @@
                             <span class="visitor-info-icon">02</span>
                             <div>
                                 <h3>Lokasi Kegiatan</h3>
-                                <p>Informasi lokasi resmi menyusul.</p>
+                                <p>Stadion Anjuk Ladang</p>
                             </div>
                         </div>
 
                         <div class="visitor-info-row">
                             <span class="visitor-info-icon">03</span>
                             <div>
-                                <h3>Tiket dan Akses</h3>
-                                <p>Informasi tiket mengikuti pengumuman resmi.</p>
+                                <h3>Penukaran Tiket</h3>
+                                <p>Sabtu, 21 November 2026, pukul 12.00–19.00 WIB di Stadion Anjuk Ladang.</p>
                             </div>
                         </div>
                     </div>
