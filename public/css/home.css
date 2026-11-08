@@ -851,46 +851,28 @@ a {
     background: var(--maroon-dark);
 }
 
-.defile-art::before,
-.defile-art::after {
+.defile-art::before {
     position: absolute;
+    inset: 0;
     content: "";
-    width: 210px;
-    height: 270px;
-    border: 1px solid rgba(201, 167, 106, 0.4);
-    border-radius: 50%;
-    transform: rotate(35deg);
-}
-
-.defile-art::after {
-    width: 165px;
-    height: 230px;
-    transform: rotate(-35deg);
+    background: linear-gradient(180deg, rgba(37, 11, 19, .05) 40%, rgba(37, 11, 19, .82));
+    z-index: 0;
 }
 
 .defile-art-one {
-    background:
-        radial-gradient(ellipse at center, rgba(170, 112, 91, 0.45), transparent 60%),
-        linear-gradient(140deg, rgba(70, 19, 31, 0.82), rgba(42, 11, 21, 0.88)),
-        url('/images/puspawara.png');
+    background-image: url('/images/puspawara.png');
     background-size: cover;
     background-position: center;
 }
 
 .defile-art-two {
-    background:
-        radial-gradient(ellipse at center, rgba(201, 167, 106, 0.22), transparent 60%),
-        linear-gradient(140deg, rgba(50, 18, 29, 0.82), rgba(89, 36, 49, 0.85)),
-        url('/images/maharajani.png');
+    background-image: url('/images/maharajani.png');
     background-size: cover;
     background-position: center;
 }
 
 .defile-art-three {
-    background:
-        radial-gradient(ellipse at center, rgba(104, 43, 55, 0.65), transparent 60%),
-        linear-gradient(140deg, rgba(37, 11, 19, 0.82), rgba(70, 19, 31, 0.85)),
-        url('/images/asmarafantasia.png');
+    background-image: url('/images/asmarafantasia.png');
     background-size: cover;
     background-position: center;
 }
@@ -911,13 +893,17 @@ a {
 }
 
 .defile-art-symbol {
+    display: none;
     font-family: "Cormorant Garamond", serif;
     font-size: 105px;
     line-height: 1;
 }
 
 .defile-art-label {
-    margin-top: 22px;
+    position: absolute;
+    bottom: 20px;
+    left: 22px;
+    right: 22px;
     font-size: 8px;
     letter-spacing: 2px;
 }
