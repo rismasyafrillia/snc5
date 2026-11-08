@@ -361,7 +361,7 @@
 
 .program-art {
     position: relative;
-    min-height: 300px;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
 }
 
@@ -576,10 +576,6 @@
 
     .event-theme h2 {
         letter-spacing: 1px;
-    }
-
-    .program-art {
-        min-height: 245px;
     }
 
     .program-card-body {
