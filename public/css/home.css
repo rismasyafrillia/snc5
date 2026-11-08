@@ -870,20 +870,29 @@ a {
 
 .defile-art-one {
     background:
-        radial-gradient(ellipse at center, rgba(170, 112, 91, 0.55), transparent 60%),
-        linear-gradient(140deg, #46131f, #2a0b15);
+        radial-gradient(ellipse at center, rgba(170, 112, 91, 0.45), transparent 60%),
+        linear-gradient(140deg, rgba(70, 19, 31, 0.82), rgba(42, 11, 21, 0.88)),
+        url('/images/puspawara.png');
+    background-size: cover;
+    background-position: center;
 }
 
 .defile-art-two {
     background:
-        radial-gradient(ellipse at center, rgba(201, 167, 106, 0.28), transparent 60%),
-        linear-gradient(140deg, #32121d, #592431);
+        radial-gradient(ellipse at center, rgba(201, 167, 106, 0.22), transparent 60%),
+        linear-gradient(140deg, rgba(50, 18, 29, 0.82), rgba(89, 36, 49, 0.85)),
+        url('/images/maharajani.png');
+    background-size: cover;
+    background-position: center;
 }
 
 .defile-art-three {
     background:
-        radial-gradient(ellipse at center, rgba(104, 43, 55, 0.8), transparent 60%),
-        linear-gradient(140deg, #250b13, #46131f);
+        radial-gradient(ellipse at center, rgba(104, 43, 55, 0.65), transparent 60%),
+        linear-gradient(140deg, rgba(37, 11, 19, 0.82), rgba(70, 19, 31, 0.85)),
+        url('/images/asmarafantasia.png');
+    background-size: cover;
+    background-position: center;
 }
 
 .defile-art-number,
