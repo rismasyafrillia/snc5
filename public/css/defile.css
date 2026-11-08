@@ -221,6 +221,9 @@
     position: relative;
     display: block;
     padding: 0;
+    align-self: start;
+    aspect-ratio: 3 / 2;
+    min-height: 0;
 }
 
 .defile-feature-art.feature-photo::after {
