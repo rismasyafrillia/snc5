@@ -57,6 +57,11 @@
                 <p class="success-description">
                     Terima kasih telah menjadi bagian dari Sparkling Nganjuk Carnival #5.
                     Pesanan tiketmu sudah tercatat dalam sistem.
+                    Mohon cantumkan <strong>nama lengkap pemesan</strong>
+                    pada keterangan pembayaran atau berita transfer.
+                    Pastikan nama yang dicantumkan sesuai dengan nama
+                    saat melakukan pemesanan tiket agar pembayaran
+                    mudah diverifikasi oleh admin.
                 </p>
 
                 <div class="ticketing-brand ticketing-brand-text">
