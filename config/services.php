@@ -38,6 +38,10 @@ return [
         'merchant_payload' => env('QRIS_MERCHANT_PAYLOAD'),
     ],
 
+    'contact_person' => [
+        'whatsapp' => env('CONTACT_PERSON_WHATSAPP', '6287857242184'),
+    ],
+
     'github_deploy' => [
         'webhook_secret' => env('GITHUB_DEPLOY_WEBHOOK_SECRET'),
     ],

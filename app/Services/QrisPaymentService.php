@@ -10,6 +10,10 @@ use RuntimeException;
 
 class QrisPaymentService
 {
+    public function __construct(
+        private OrderExpirationService $orderExpirationService
+    ) {}
+
     public function createDynamicPayload(Order $order): string
     {
         if ($order->status !== 'pending' || (int) $order->total_amount < 1) {
@@ -84,6 +88,8 @@ class QrisPaymentService
 
     public function confirmPayment(int $orderId, int $adminId): int
     {
+        $this->orderExpirationService->expireDue(orderId: $orderId);
+
         return DB::transaction(function () use ($orderId, $adminId): int {
             $order = Order::query()
                 ->with('items')
@@ -95,7 +101,18 @@ class QrisPaymentService
             }
 
             if ($order->status !== 'pending') {
-                throw new RuntimeException('Hanya pesanan yang menunggu pembayaran yang dapat dikonfirmasi.');
+                throw new RuntimeException(
+                    $order->status === 'expired'
+                        ? 'Pesanan telah kedaluwarsa.'
+                        : 'Hanya pesanan yang menunggu pembayaran yang dapat dikonfirmasi.'
+                );
+            }
+
+            if (
+                ($order->expires_at !== null && $order->expires_at->lte(now())) ||
+                ($order->expires_at === null && $order->created_at?->lte(now()->subMinutes(15)))
+            ) {
+                throw new RuntimeException('Pesanan telah kedaluwarsa.');
             }
 
             if ($order->items->isEmpty()) {
@@ -141,6 +158,74 @@ class QrisPaymentService
                     'confirmed_by' => $adminId,
                     'confirmed_at' => $confirmedAt->toISOString(),
                 ],
+                'paid_at' => $confirmedAt,
+            ]);
+            $payment->save();
+
+            return $order->id;
+        }, 3);
+    }
+
+    public function confirmExpiredPayment(int $orderId, int $adminId): int
+    {
+        return DB::transaction(function () use ($orderId, $adminId): int {
+            $order = Order::query()
+                ->with('items')
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            if ($order->status !== 'expired') {
+                throw new RuntimeException('Hanya pesanan kedaluwarsa yang dapat dikonfirmasi melalui override.');
+            }
+
+            if ($order->items->isEmpty()) {
+                throw new RuntimeException('Pesanan tidak memiliki rincian tiket.');
+            }
+
+            foreach ($order->items as $item) {
+                $ticketType = TicketType::query()
+                    ->whereKey($item->ticket_type_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $available = (int) $ticketType->quota
+                    - (int) $ticketType->reserved_quantity
+                    - (int) $ticketType->sold_quantity;
+
+                if ($available < (int) $item->quantity) {
+                    throw new RuntimeException(
+                        'Kuota tiket tidak lagi mencukupi. Pesanan tidak dikonfirmasi agar tidak terjadi penjualan melebihi kuota.'
+                    );
+                }
+
+                $ticketType->sold_quantity += (int) $item->quantity;
+                $ticketType->save();
+            }
+
+            $confirmedAt = now();
+            $order->status = 'paid';
+            $order->paid_at = $confirmedAt;
+            $order->save();
+
+            $payment = Payment::query()
+                ->where('provider_order_id', $order->order_code)
+                ->lockForUpdate()
+                ->first() ?? new Payment([
+                    'order_id' => $order->id,
+                    'provider_order_id' => $order->order_code,
+                ]);
+            $rawStatus = $payment->raw_status ?? [];
+            $rawStatus['confirmation_method'] = 'manual_late_override';
+            $rawStatus['confirmed_by'] = $adminId;
+            $rawStatus['confirmed_at'] = $confirmedAt->toISOString();
+
+            $payment->fill([
+                'order_id' => $order->id,
+                'provider' => 'qris',
+                'payment_type' => 'QRIS',
+                'transaction_status' => 'paid',
+                'gross_amount' => $order->total_amount,
+                'raw_status' => $rawStatus,
                 'paid_at' => $confirmedAt,
             ]);
             $payment->save();

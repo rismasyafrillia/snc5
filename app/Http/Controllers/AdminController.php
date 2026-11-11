@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketType;
 use App\Models\User;
+use App\Services\OrderExpirationService;
 use App\Services\QrisPaymentService;
 use App\Services\TicketIssuanceService;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -55,8 +56,10 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard');
     }
 
-    public function dashboard(): View
+    public function dashboard(OrderExpirationService $orderExpirationService): View
     {
+        $orderExpirationService->expireDue();
+
         $event = Event::query()
             ->where('slug', 'sparkling-nganjuk-carnival-5')
             ->firstOrFail();
@@ -87,6 +90,13 @@ class AdminController extends Controller
                 },
             ])
             ->latest('paid_at')
+            ->get();
+
+        $expiredOrders = Order::query()
+            ->where('event_id', $event->id)
+            ->where('status', 'expired')
+            ->with(['items.ticketType'])
+            ->latest('updated_at')
             ->get();
 
         $confirmedAdminIds = $confirmedOrders
@@ -123,6 +133,7 @@ class AdminController extends Controller
             'ticketTypes',
             'pendingOrders',
             'confirmedOrders',
+            'expiredOrders',
             'checkedInTickets'
         ));
     }
@@ -249,6 +260,57 @@ class AdminController extends Controller
             ]);
         }
 
+        return $this->issueAndSendConfirmedTickets(
+            $orderId,
+            $order,
+            $ticketIssuanceService,
+            'Pembayaran dikonfirmasi dan tiket telah diterbitkan.'
+        );
+    }
+
+    public function confirmExpiredPayment(
+        Request $request,
+        Order $order,
+        QrisPaymentService $qrisPaymentService,
+        TicketIssuanceService $ticketIssuanceService
+    ): RedirectResponse {
+        $request->validate([
+            'payment_verified' => ['accepted'],
+        ], [
+            'payment_verified.accepted' => 'Konfirmasi bahwa dana sudah diverifikasi di riwayat transaksi merchant.',
+        ]);
+
+        try {
+            $orderId = $qrisPaymentService->confirmExpiredPayment(
+                $order->id,
+                (int) Auth::id()
+            );
+        } catch (\Throwable $e) {
+            Log::error('Gagal menggunakan override pembayaran kedaluwarsa', [
+                'order_code' => $order->order_code,
+                'admin_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors([
+                'payment' => $e->getMessage(),
+            ]);
+        }
+
+        return $this->issueAndSendConfirmedTickets(
+            $orderId,
+            $order,
+            $ticketIssuanceService,
+            'Pembayaran terlambat dikonfirmasi dan tiket telah diterbitkan.'
+        );
+    }
+
+    private function issueAndSendConfirmedTickets(
+        int $orderId,
+        Order $order,
+        TicketIssuanceService $ticketIssuanceService,
+        string $successMessage
+    ): RedirectResponse {
         try {
             $ticketIssuanceService->issueAndSend($orderId);
         } catch (\Throwable $e) {
@@ -264,7 +326,7 @@ class AdminController extends Controller
 
         return redirect()
             ->route('admin.dashboard')
-            ->with('success', 'Pembayaran dikonfirmasi dan tiket telah diterbitkan.');
+            ->with('success', $successMessage);
     }
 
     public function logout(Request $request): RedirectResponse

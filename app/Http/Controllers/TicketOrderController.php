@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\TicketType;
+use App\Services\OrderExpirationService;
 use App\Services\QrisPaymentService;
 use App\Services\TicketOrderService;
 use App\Services\TicketQrService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -55,9 +57,10 @@ class TicketOrderController extends Controller
                 'max:255',
             ],
             'buyer_phone' => [
-                'nullable',
+                'required',
                 'string',
                 'max:30',
+                'regex:/^\+?[0-9\s().-]+$/',
             ],
             'items' => [
                 'required',
@@ -76,6 +79,9 @@ class TicketOrderController extends Controller
                 'min:0',
                 'max:10',
             ],
+        ], [
+            'buyer_phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'buyer_phone.regex' => 'Masukkan nomor WhatsApp yang valid.',
         ]);
 
         $order = $ticketOrderService->create($data);
@@ -94,13 +100,16 @@ class TicketOrderController extends Controller
 
     public function payment(
         string $order_code,
+        OrderExpirationService $orderExpirationService,
         QrisPaymentService $qrisPaymentService,
         TicketQrService $ticketQrService
     ): View {
         $order = Order::query()
-            ->with(['event', 'items.ticketType'])
             ->where('order_code', $order_code)
             ->firstOrFail();
+
+        $orderExpirationService->expireDue(orderId: $order->id);
+        $order->refresh()->load(['event', 'items.ticketType']);
 
         $paymentQrImage = null;
         $paymentError = null;
@@ -120,21 +129,47 @@ class TicketOrderController extends Controller
             }
         }
 
+        $ticketDetails = $order->items
+            ->map(fn ($item): string => '- '.$item->ticketType->name.' x '.$item->quantity.' (Rp'.number_format($item->subtotal, 0, ',', '.').')')
+            ->implode("\n");
+        $paymentWhatsappMessage = implode("\n", [
+            'Halo Admin, saya ingin konfirmasi pembayaran QRIS.',
+            '',
+            'Kode pesanan: '.$order->order_code,
+            'Status pesanan: '.$order->status,
+            'Nama pemesan: '.$order->buyer_name,
+            'WhatsApp pemesan: '.$order->buyer_phone,
+            'Email: '.$order->buyer_email,
+            'Acara: '.$order->event->name,
+            'Rincian tiket:',
+            $ticketDetails,
+            'Total: Rp'.number_format($order->total_amount, 0, ',', '.'),
+            '',
+            'Mohon bantu cek pembayaran saya. Referensi transaksi QRIS: (isi jika tersedia).',
+        ]);
+        $paymentWhatsappUrl = 'https://wa.me/'.config('services.contact_person.whatsapp')
+            .'?text='.rawurlencode($paymentWhatsappMessage);
+
         return view('orders.success', compact(
             'order',
             'paymentQrImage',
-            'paymentError'
+            'paymentError',
+            'paymentWhatsappUrl'
         ));
     }
 
-    public function checkStatus(string $order_code)
-    {
+    public function checkStatus(
+        string $order_code,
+        OrderExpirationService $orderExpirationService
+    ): JsonResponse {
         $order = Order::query()
             ->where('order_code', $order_code)
             ->firstOrFail();
 
+        $orderExpirationService->expireDue(orderId: $order->id);
+
         return response()->json([
-            'status' => $order->status,
+            'status' => $order->fresh()->status,
         ]);
     }
 }

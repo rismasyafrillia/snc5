@@ -50,6 +50,8 @@
                     <h1>Menunggu <em>Pembayaran</em></h1>
                 @elseif ($order->status === 'paid')
                     <h1>Pembayaran <em>Terkonfirmasi</em></h1>
+                @elseif ($order->status === 'expired')
+                    <h1>Pesanan <em>Kedaluwarsa</em></h1>
                 @else
                     <h1>Status <em>Pesanan</em></h1>
                 @endif
@@ -104,6 +106,15 @@
                     <div>
                         <strong>Pesanan menunggu pembayaran</strong>
                         <p>
+                            Selesaikan pembayaran dalam
+                            <strong
+                                id="payment-countdown"
+                                data-expires-at="{{ ($order->expires_at ?? $order->created_at->copy()->addMinutes(15))->timestamp }}"
+                                role="timer"
+                                aria-label="Waktu tersisa untuk pembayaran"
+                            >--:--</strong>.
+                            Batas waktu:
+                            <strong>{{ ($order->expires_at ?? $order->created_at->copy()->addMinutes(15))->timezone('Asia/Jakarta')->format('H:i') }} WIB</strong>.
                             Setelah pembayaran berhasil, admin akan memeriksa dan mengonfirmasi transaksi secara manual.
                         </p>
                     </div>
@@ -114,6 +125,14 @@
                     <div>
                         <strong>Pembayaran telah dikonfirmasi</strong>
                         <p>Pesanan ini telah tercatat sebagai lunas.</p>
+                    </div>
+                </div>
+            @elseif ($order->status === 'expired')
+                <div class="payment-notice" role="alert">
+                    <span class="notice-symbol">!</span>
+                    <div>
+                        <strong>Batas pembayaran 15 menit telah berakhir</strong>
+                        <p>Reservasi tiket telah dilepas. Silakan buat pesanan baru jika masih ingin membeli tiket.</p>
                     </div>
                 </div>
             @else
@@ -204,7 +223,20 @@
                     <p class="success-spam-note">
                         Jika tiket belum muncul di email, periksa folder Spam.
                     </p>
-                    @include('partials.contact-person')
+                    @if (in_array($order->status, ['pending', 'expired'], true))
+                        <p class="success-spam-note">
+                            Jika tiket belum muncul di email/folder spam, kirim capture riwayat transaksi melalui WhatsApp di bawah ini. Admin akan memverifikasi pembayaran melalui riwayat transaksi merchant.
+                        </p>
+                        <a
+                            class="payment-whatsapp-btn"
+                            href="{{ $paymentWhatsappUrl }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <span>Konfirmasi pembayaran via WhatsApp</span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                    @endif
                 </div>
 
                 <a href="{{ route('home') }}" class="success-home-btn">
@@ -220,6 +252,35 @@
             </p>
         </div>
     </main>
+
+    @if ($order->status === 'pending')
+        <script>
+            const paymentCountdown = document.getElementById('payment-countdown');
+            const paymentExpiresAt = Number(paymentCountdown.dataset.expiresAt);
+            let hasReloadedAtExpiry = false;
+            let countdownInterval;
+
+            function updatePaymentCountdown() {
+                const remainingSeconds = Math.max(
+                    0,
+                    paymentExpiresAt - Math.floor(Date.now() / 1000)
+                );
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+
+                paymentCountdown.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                if (remainingSeconds === 0 && !hasReloadedAtExpiry) {
+                    hasReloadedAtExpiry = true;
+                    window.clearInterval(countdownInterval);
+                    window.location.reload();
+                }
+            }
+
+            countdownInterval = window.setInterval(updatePaymentCountdown, 1000);
+            updatePaymentCountdown();
+        </script>
+    @endif
 
 </body>
 </html>
