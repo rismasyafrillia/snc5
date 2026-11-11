@@ -17,6 +17,7 @@ class Order extends Model
         'buyer_name',
         'buyer_email',
         'buyer_phone',
+        'buyer_phone_normalized',
         'quantity',
         'total_amount',
         'status',

@@ -197,6 +197,14 @@
             color: #64748b;
         }
 
+        .payment-countdown {
+            display: inline-block;
+            margin-top: 5px;
+            color: #92400e;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
         input,
         select {
             width: 100%;
@@ -274,6 +282,39 @@
 
         .action-cell {
             min-width: 100px;
+        }
+
+        .late-payment-confirmation {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            min-width: 190px;
+        }
+
+        .late-payment-confirmation label {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .late-payment-confirmation input[type="checkbox"] {
+            flex: 0 0 16px;
+            width: 16px;
+            min-width: 16px;
+            height: 16px;
+            margin: 1px 0 0;
+            padding: 0;
+            accent-color: #166534;
+        }
+
+        .late-payment-confirmation button {
+            width: 100%;
+            white-space: normal;
+            line-height: 1.3;
         }
 
         .empty-state {
@@ -582,7 +623,12 @@
                         <tr>
                             <td>
                                 <div class="ticket-name">{{ $order->order_code }}</div>
-                                <div class="ticket-code">{{ $order->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</div>
+                                <div class="ticket-code">{{ $order->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }} WIB</div>
+                                <time
+                                    class="payment-countdown"
+                                    data-payment-countdown="{{ ($order->expires_at ?? $order->created_at->copy()->addMinutes(15))->timestamp }}"
+                                    aria-label="Waktu tersisa untuk pembayaran"
+                                >--:--</time>
                             </td>
                             <td>
                                 <div>{{ $order->buyer_name }}</div>
@@ -612,6 +658,71 @@
                         <tr>
                             <td colspan="5" class="empty-state">
                                 Tidak ada pembayaran QRIS yang menunggu konfirmasi.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Transaksi Kedaluwarsa</h2>
+        <p class="muted">
+            Pesanan ini melewati batas waktu pembayaran 15 menit dan reservasi tiketnya telah dilepas.
+        </p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pesanan</th>
+                        <th>Pemesan</th>
+                        <th>Tiket</th>
+                        <th>Total</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($expiredOrders as $order)
+                        <tr>
+                            <td>
+                                <div class="ticket-name">{{ $order->order_code }}</div>
+                                <div class="ticket-code">{{ $order->updated_at->timezone('Asia/Jakarta')->format('d M Y H:i') }} WIB</div>
+                            </td>
+                            <td>
+                                <div>{{ $order->buyer_name }}</div>
+                                <div class="ticket-code">{{ $order->buyer_email }}</div>
+                                <div class="ticket-code">WA: {{ $order->buyer_phone }}</div>
+                            </td>
+                            <td>
+                                @foreach ($order->items as $item)
+                                    <div>{{ $item->ticketType->name }} × {{ $item->quantity }}</div>
+                                @endforeach
+                            </td>
+                            <td>Rp{{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                            <td class="action-cell">
+                                <form
+                                    class="late-payment-confirmation"
+                                    method="POST"
+                                    action="{{ route('admin.orders.confirm-expired-payment', $order) }}"
+                                    onsubmit="return confirm('Gunakan hanya jika dana sudah ditemukan di riwayat transaksi bank atau merchant QRIS. Konfirmasi akan memeriksa ketersediaan kuota dan menerbitkan tiket.')"
+                                >
+                                    @csrf
+                                    <label>
+                                        <input type="checkbox" name="payment_verified" value="1" required>
+                                        Dana sudah diverifikasi
+                                    </label>
+                                    <button class="confirm-payment" type="submit">
+                                        Konfirmasi terlambat
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                Belum ada transaksi yang kedaluwarsa.
                             </td>
                         </tr>
                     @endforelse
@@ -652,7 +763,7 @@
                         <tr>
                             <td>
                                 <div class="ticket-name">{{ $order->order_code }}</div>
-                                <div class="ticket-code">{{ $order->paid_at?->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</div>
+                                <div class="ticket-code">{{ $order->paid_at?->timezone('Asia/Jakarta')->format('d M Y H:i') }} WIB</div>
                             </td>
                             <td>
                                 <div>{{ $order->buyer_name }}</div>
@@ -666,7 +777,7 @@
                             </td>
                             <td>Rp{{ number_format($order->total_amount, 0, ',', '.') }}</td>
                             <td>{{ $confirmation['admin_name'] }}</td>
-                            <td>{{ $confirmation['confirmed_at']?->timezone('Asia/Jakarta')->format('d/m/Y H:i') ?? 'Tidak tercatat' }} WIB</td>
+                            <td>{{ $confirmation['confirmed_at']?->timezone('Asia/Jakarta')->format('d M Y H:i') ?? 'Tidak tercatat' }} WIB</td>
                         </tr>
                     @empty
                         <tr>
@@ -714,7 +825,7 @@
                             </td>
                             <td>{{ $ticket->orderItem->order->buyer_phone ?: 'Tidak dicantumkan' }}</td>
                             <td>{{ $ticket->orderItem->ticketType->name }}</td>
-                            <td>{{ $ticket->checked_in_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</td>
+                            <td>{{ $ticket->checked_in_at->timezone('Asia/Jakarta')->format('d M Y H:i') }} WIB</td>
                         </tr>
                     @empty
                         <tr>
@@ -796,6 +907,28 @@
 
     updateDashboardClock();
     window.setInterval(updateDashboardClock, 1000);
+
+    const paymentCountdowns = [...document.querySelectorAll('[data-payment-countdown]')];
+    let hasReloadedForExpiredPayment = false;
+
+    const updatePaymentCountdowns = () => {
+        paymentCountdowns.forEach((countdown) => {
+            const expiresAt = Number(countdown.dataset.paymentCountdown);
+            const remainingSeconds = Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+
+            countdown.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            if (remainingSeconds === 0 && !hasReloadedForExpiredPayment) {
+                hasReloadedForExpiredPayment = true;
+                window.location.reload();
+            }
+        });
+    };
+
+    updatePaymentCountdowns();
+    window.setInterval(updatePaymentCountdowns, 1000);
 </script>
 </body>
 </html>

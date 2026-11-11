@@ -12,6 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class TicketOrderService
 {
+    public function __construct(
+        private OrderExpirationService $orderExpirationService
+    ) {}
+
     public function create(array $data): Order
     {
         return DB::transaction(function () use ($data) {
@@ -23,6 +27,24 @@ class TicketOrderService
             if ($event->status !== 'published') {
                 throw ValidationException::withMessages([
                     'event_id' => 'Acara belum tersedia untuk pemesanan.',
+                ]);
+            }
+
+            $normalizedPhone = $this->normalizeWhatsappNumber($data['buyer_phone']);
+            $this->orderExpirationService->expireDue(
+                normalizedPhone: $normalizedPhone,
+                limit: 1000
+            );
+
+            $hasPendingOrder = Order::query()
+                ->where('buyer_phone_normalized', $normalizedPhone)
+                ->where('status', 'pending')
+                ->lockForUpdate()
+                ->exists();
+
+            if ($hasPendingOrder) {
+                throw ValidationException::withMessages([
+                    'buyer_phone' => 'Nomor WhatsApp ini masih memiliki transaksi yang menunggu pembayaran.',
                 ]);
             }
 
@@ -47,10 +69,11 @@ class TicketOrderService
 
             $order = Order::create([
                 'event_id' => $event->id,
-                'order_code' => 'SNC-' . Str::upper(Str::random(12)),
+                'order_code' => 'SNC-'.Str::upper(Str::random(12)),
                 'buyer_name' => $data['buyer_name'],
                 'buyer_email' => $data['buyer_email'],
-                'buyer_phone' => $data['buyer_phone'] ?? null,
+                'buyer_phone' => trim($data['buyer_phone']),
+                'buyer_phone_normalized' => $normalizedPhone,
                 'quantity' => $totalQuantity,
                 'total_amount' => 0,
                 'status' => 'pending',
@@ -126,5 +149,28 @@ class TicketOrderService
 
             return $order->load('items');
         }, 3);
+    }
+
+    private function normalizeWhatsappNumber(string $phone): string
+    {
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '62'.substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62'.$digits;
+        }
+
+        if (preg_match('/^[1-9]\d{7,14}$/', $digits) !== 1) {
+            throw ValidationException::withMessages([
+                'buyer_phone' => 'Masukkan nomor WhatsApp yang valid.',
+            ]);
+        }
+
+        return $digits;
     }
 }

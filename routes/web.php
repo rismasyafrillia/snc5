@@ -92,6 +92,11 @@ Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
         'confirmPayment',
     ])->name('orders.confirm-payment');
 
+    Route::post('/orders/{order}/confirm-expired-payment', [
+        AdminController::class,
+        'confirmExpiredPayment',
+    ])->name('orders.confirm-expired-payment');
+
     Route::post('/logout', [
         AdminController::class,
         'logout',

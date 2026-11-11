@@ -246,7 +246,7 @@
                                 </div>
 
                                 <div class="form-field">
-                                    <label for="buyer_phone">Nomor telepon</label>
+                                    <label for="buyer_phone">Nomor WhatsApp <span>*</span></label>
                                     <input
                                         type="tel"
                                         id="buyer_phone"
@@ -255,6 +255,7 @@
                                         maxlength="30"
                                         placeholder="Contoh: 08xxxxxxxxxx"
                                         autocomplete="tel"
+                                        required
                                     >
                                 </div>
 

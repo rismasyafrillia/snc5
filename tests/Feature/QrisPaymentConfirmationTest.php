@@ -81,6 +81,135 @@ class QrisPaymentConfirmationTest extends TestCase
         $this->assertSame(7, Payment::query()->sole()->raw_status['confirmed_by']);
     }
 
+    public function test_admin_cannot_confirm_payment_after_the_fifteen_minute_deadline(): void
+    {
+        $this->travelTo('2026-11-11 12:15:00');
+
+        $event = Event::query()->create([
+            'name' => 'SNC #5',
+            'slug' => 'snc-5-expired',
+            'status' => 'published',
+        ]);
+        $ticketType = TicketType::query()->create([
+            'event_id' => $event->id,
+            'name' => 'Regular',
+            'code' => 'REG',
+            'price' => 12000,
+            'quota' => 10,
+            'reserved_quantity' => 1,
+            'sold_quantity' => 0,
+            'status' => 'active',
+        ]);
+        $order = Order::query()->create([
+            'event_id' => $event->id,
+            'order_code' => 'SNC-EXPIRED-ORDER',
+            'buyer_name' => 'Buyer',
+            'buyer_email' => 'buyer@example.com',
+            'quantity' => 1,
+            'total_amount' => 12000,
+            'status' => 'pending',
+            'expires_at' => '2026-11-11 12:15:00',
+        ]);
+        $order->items()->create([
+            'ticket_type_id' => $ticketType->id,
+            'quantity' => 1,
+            'unit_price' => 12000,
+            'subtotal' => 12000,
+        ]);
+        Payment::query()->create([
+            'order_id' => $order->id,
+            'provider' => 'qris',
+            'provider_order_id' => $order->order_code,
+            'transaction_status' => 'pending',
+            'gross_amount' => 12000,
+        ]);
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+
+        $this->from(route('admin.dashboard'))
+            ->actingAs($admin)
+            ->post(route('admin.orders.confirm-payment', $order))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors('payment');
+
+        $this->assertSame('expired', $order->fresh()->status);
+        $this->assertSame('expired', Payment::query()->sole()->transaction_status);
+        $this->assertSame(0, $ticketType->fresh()->reserved_quantity);
+        $this->assertDatabaseCount('tickets', 0);
+    }
+
+    public function test_admin_can_confirm_a_late_payment_after_verifying_funds_and_available_quota(): void
+    {
+        [$order, $ticketType] = $this->createExpiredOrder(quantity: 2);
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+        Mail::fake();
+
+        $this->from(route('admin.dashboard'))
+            ->actingAs($admin)
+            ->post(route('admin.orders.confirm-expired-payment', $order), [
+                'payment_verified' => '1',
+            ])
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHas(
+                'success',
+                'Pembayaran terlambat dikonfirmasi dan tiket telah diterbitkan.'
+            );
+
+        $payment = Payment::query()->sole();
+
+        $this->assertSame('paid', $order->fresh()->status);
+        $this->assertSame(2, $ticketType->fresh()->sold_quantity);
+        $this->assertSame(0, $ticketType->fresh()->reserved_quantity);
+        $this->assertSame('paid', $payment->transaction_status);
+        $this->assertSame('manual_late_override', $payment->raw_status['confirmation_method']);
+        $this->assertSame($admin->id, $payment->raw_status['confirmed_by']);
+        $this->assertDatabaseCount('tickets', 2);
+        Mail::assertSent(TicketConfirmationMail::class);
+    }
+
+    public function test_admin_cannot_override_an_expired_payment_when_ticket_quota_is_no_longer_available(): void
+    {
+        [$order, $ticketType] = $this->createExpiredOrder(quota: 1, soldQuantity: 1);
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+
+        $this->from(route('admin.dashboard'))
+            ->actingAs($admin)
+            ->post(route('admin.orders.confirm-expired-payment', $order), [
+                'payment_verified' => '1',
+            ])
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors([
+                'payment' => 'Kuota tiket tidak lagi mencukupi. Pesanan tidak dikonfirmasi agar tidak terjadi penjualan melebihi kuota.',
+            ]);
+
+        $this->assertSame('expired', $order->fresh()->status);
+        $this->assertSame(1, $ticketType->fresh()->sold_quantity);
+        $this->assertSame('expired', Payment::query()->sole()->transaction_status);
+        $this->assertDatabaseCount('tickets', 0);
+    }
+
+    public function test_admin_must_acknowledge_payment_verification_before_late_confirmation(): void
+    {
+        [$order, $ticketType] = $this->createExpiredOrder();
+        $admin = User::factory()->create();
+        $admin->forceFill(['role' => 'admin'])->save();
+
+        $this->from(route('admin.dashboard'))
+            ->actingAs($admin)
+            ->post(route('admin.orders.confirm-expired-payment', $order))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHasErrors([
+                'payment_verified' => 'Konfirmasi bahwa dana sudah diverifikasi di riwayat transaksi merchant.',
+            ]);
+
+        $this->assertSame('expired', $order->fresh()->status);
+        $this->assertSame(0, $ticketType->fresh()->sold_quantity);
+        $this->assertSame('expired', Payment::query()->sole()->transaction_status);
+        $this->assertDatabaseCount('tickets', 0);
+    }
+
     public function test_admin_can_confirm_from_the_dashboard_and_issue_tickets(): void
     {
         $event = Event::query()->create([
@@ -169,7 +298,7 @@ class QrisPaymentConfirmationTest extends TestCase
             ->assertOk()
             ->assertSee('SNC-CONFIRMED-ORDER')
             ->assertSee('Admin Konfirmasi')
-            ->assertSee('08/11/2026 19:34 WIB');
+            ->assertSee('08 Nov 2026 19:34 WIB');
     }
 
     public function test_admin_can_download_checked_in_tickets_as_csv(): void
@@ -294,7 +423,57 @@ class QrisPaymentConfirmationTest extends TestCase
             ->assertSee('SNC-CHECKED-IN')
             ->assertSee('Buyer Check In')
             ->assertSee('08123456789')
-            ->assertSee('21/11/2026 19:30 WIB')
+            ->assertSee('21 Nov 2026 19:30 WIB')
             ->assertDontSee('SNC-NOT-CHECKED-IN');
+    }
+
+    /**
+     * @return array{Order, TicketType}
+     */
+    private function createExpiredOrder(
+        int $quantity = 1,
+        int $quota = 10,
+        int $soldQuantity = 0
+    ): array {
+        $event = Event::query()->create([
+            'name' => 'SNC #5',
+            'slug' => 'snc-expired-'.$quantity.'-'.$quota.'-'.$soldQuantity,
+            'status' => 'published',
+        ]);
+        $ticketType = TicketType::query()->create([
+            'event_id' => $event->id,
+            'name' => 'Regular',
+            'code' => 'REG',
+            'price' => 12000,
+            'quota' => $quota,
+            'reserved_quantity' => 0,
+            'sold_quantity' => $soldQuantity,
+            'status' => 'active',
+        ]);
+        $order = Order::query()->create([
+            'event_id' => $event->id,
+            'order_code' => 'SNC-LATE-'.$quantity.'-'.$quota.'-'.$soldQuantity,
+            'buyer_name' => 'Buyer',
+            'buyer_email' => 'buyer@example.com',
+            'quantity' => $quantity,
+            'total_amount' => 12000 * $quantity,
+            'status' => 'expired',
+        ]);
+        $order->items()->create([
+            'ticket_type_id' => $ticketType->id,
+            'quantity' => $quantity,
+            'unit_price' => 12000,
+            'subtotal' => 12000 * $quantity,
+        ]);
+        Payment::query()->create([
+            'order_id' => $order->id,
+            'provider' => 'qris',
+            'provider_order_id' => $order->order_code,
+            'transaction_status' => 'expired',
+            'gross_amount' => 12000 * $quantity,
+            'raw_status' => ['expired_at' => now()->toISOString()],
+        ]);
+
+        return [$order, $ticketType];
     }
 }

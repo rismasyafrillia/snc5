@@ -953,6 +953,37 @@
     color: var(--order-maroon);
 }
 
+.payment-whatsapp-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 48px;
+    margin: 12px 0 0;
+    padding: 12px 16px;
+    border: 1px solid #1da851;
+    background: #25d366;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.payment-whatsapp-btn span:last-child {
+    flex: 0 0 auto;
+    font-size: 16px;
+}
+
+.payment-whatsapp-btn:hover {
+    border-color: #168b45;
+    background: #1da851;
+    color: #fff;
+}
+
 .success-home-btn {
     display: flex;
     justify-content: space-between;
